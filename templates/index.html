@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ thống quản lý giao thông Hoàng Sơn</title>
+</head>
+
+<body>
+    <!-- Upload image -->
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" accept="image/*">
+        <button type="submit">Upload</button>
+    </form>
+    <div id="message"></div>
+    <div id="image-preview" style="max-width: 500px;"></div> <!-- Container to show the image -->
+
+    <br>
+    <!-- Đánh giá mô hình -->
+    <form id="train-form" enctype="multipart/form-data">
+        <button type="submit">Train Data</button>
+    </form>
+    <h3>Kết quả sau khi đánh giá model</h3>
+    <p id="train-result"></p>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const trainForm = document.getElementById('train-form');
+        const message = document.getElementById('message');
+        const imagePreview = document.getElementById('image-preview');
+        const trainResult = document.getElementById('train-result');
+        var fileNameData = "";
+
+        // Train data
+        trainForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            console.log(fileNameData)
+            if (fileNameData != "") {
+                const formData = new FormData(trainForm);
+                fetch('/train/' + fileNameData, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.text()) 
+                    .then(message => {
+                        trainResult.innerHTML = message
+                        const imgElement = document.createElement('img');
+                        imgElement.id = "result";
+                        imgElement.src = './runs/' + fileNameData; 
+                        imgElement.alt = 'Uploaded Image';
+                        imgElement.style.maxWidth = '100%'; 
+                        imagePreview.innerHTML = ''; 
+                        imagePreview.appendChild(imgElement); 
+                    })
+                    .catch(error => {
+                        console.error("Fetch error:", error);
+                    });
+            }
+        });
+
+        // Upload image
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(filename => {
+                    message.innerHTML = `<p style="color:green">File uploaded successfully: ${filename}</p>`;
+                    // Create image element and show uploaded image
+                    const imgElement = document.createElement('img');
+                    imgElement.id = "result";
+                    imgElement.src = './img/' + filename; // URL to access the image
+                    fileNameData = filename;
+                    imgElement.alt = 'Uploaded Image';
+                    imgElement.style.maxWidth = '100%'; // Optional: Scale image to fit
+                    imagePreview.innerHTML = ''; // Clear any previous image
+                    imagePreview.appendChild(imgElement); // Show new image
+                })
+                .catch(error => {
+                    message.innerHTML = `<p style="color:red;">Upload failed</p>`;
+                    console.error(error);
+                });
+        });
+    </script>
+</body>
+
+</html>
