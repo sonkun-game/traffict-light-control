@@ -1,0 +1,25 @@
+
+east-car: "Xe ô tô ở phía Đông"
+east-long-truck: "Xe tải ở phía Đông" 
+east-pickup-truck: "Xe bán tải ở phía Đông"
+east-bus: "Xe bus ở phía Đông"
+
+north-car: "Xe ô tô ở phía Bắc"
+north-long-truck: "Xe tải ở phía Bắc"
+north-pickup-truck: "Xe bán tải ở phía Bắc"
+north-bus: "Xe bus ở phía Bắc"
+
+south-car: "Xe ô tô ở phía Nam"
+south-long-truck: "Xe tải ở phía Nam"
+south-pickup-truck: "Xe bán tải ở phía Nam"
+south-bus: "Xe bus ở phía Nam"
+
+west-car: "Xe ô tô ở phía Tây"
+west-long-truck: "Xe tải ở phía tây"
+west-pickup-truck: "Xe bán tải ở phía tây"
+west-bus: "Xe bus ở phía tây"
+
+car-intersections: "Xe ô tô trong giao lộ"
+long-truck-intersections: "Xe tải trong giao lộ"
+pickup-truck-intersections: "Xe bán tải trong giao lộ"
+bus-intersections: "Xe bus trong giao lộ"

@@ -6,30 +6,324 @@
     <title>Hệ thống quản lý giao thông Hoàng Sơn</title>
 </head>
 
-<body>
-    <!-- Upload image -->
-    <form id="upload-form" enctype="multipart/form-data">
-        <input type="file" name="file" id="file" accept="image/*">
-        <button type="submit">Upload</button>
-    </form>
-    <div id="message"></div>
-    <div id="image-preview" style="max-width: 500px;"></div> <!-- Container to show the image -->
+<body style="background-color: bisque;">
+    <div style="display: flex;">
+        <!-- left panel -->
+        <div style="border-right: 1px black solid; padding: 10px; width: 70%; height: 100vh;">
+            <!-- Upload image -->
+            <form id="upload-form" enctype="multipart/form-data">
+                <input type="file" name="file" id="file" accept="image/*">
+                <button type="submit">Upload</button>
+            </form>
+            <div id="message"></div>
+            <div id="image-preview" style="max-width: 400px;"></div> <!-- Container to show the image -->
+            <br>
+            <!-- Train mô hình -->
+            <form id="train-form" enctype="multipart/form-data">
+                <button type="submit">Train Data</button>
+            </form>
+            <h3>Kết quả sau khi đánh giá model</h3>
+            <p id="train-result"></p>
 
-    <br>
-    <!-- Đánh giá mô hình -->
-    <form id="train-form" enctype="multipart/form-data">
-        <button type="submit">Train Data</button>
-    </form>
-    <h3>Kết quả sau khi đánh giá model</h3>
-    <p id="train-result"></p>
+            <!-- Đánh giá mô hình -->
+            <form id="analy-form" enctype="multipart/form-data">
+                <button type="submit">Analysis Data</button>
+            </form>
+
+            <textarea id="log" readonly cols="80" rows="20"></textarea>
+        </div>
+
+        <!-- right panel -->
+        <div class="traffic-light-container ">
+            <div class="intersection">
+                <!-- North -->
+
+                <div class="traffic-light north">
+                    <span id="north" style="position: absolute; top: -20px">30</span>
+                    <div id="north-red" class="light red"></div>
+                    <div id="north-yellow" class="light yellow"></div>
+                    <div id="north-green" class="light green"></div>
+                </div>
+
+                <!-- Center (East & West) -->
+                <div class="horizontal">
+                    <span id="west" style="position: absolute; left: -20px">30</span>
+                    <!-- West -->
+                    <div class="traffic-light west">
+                        <div id="west-red" class="light red"></div>
+                        <div id="west-yellow" class="light yellow"></div>
+                        <div id="west-green" class="light green"></div>
+                    </div>
+
+                    <!-- East -->
+                    <div class="traffic-light east">
+                        <span id="east" style="position: absolute; top: 0px; right: -20px;">30</span>
+                        <div id="east-red" class="light red"></div>
+                        <div id="east-yellow" class="light yellow"></div>
+                        <div id="east-green" class="light green"></div>
+                    </div>
+                </div>
+
+                <!-- South -->
+                <div class="traffic-light south">
+                    <span id="south" style="position: absolute; bottom: 155px">30</span>
+                    <div id="south-red" class="light red"></div>
+                    <div id="south-yellow" class="light yellow"></div>
+                    <div id="south-green" class="light green"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const form = document.getElementById('upload-form');
         const trainForm = document.getElementById('train-form');
+        const analyForm = document.getElementById('analy-form');
         const message = document.getElementById('message');
         const imagePreview = document.getElementById('image-preview');
         const trainResult = document.getElementById('train-result');
+        const logBox = document.getElementById("log");
         var fileNameData = "";
+
+        const east = document.getElementById("east");
+        const eastGreen = document.getElementById("east-green");
+        const eastRed = document.getElementById("east-red");
+        const eastYellow = document.getElementById("east-yellow");
+
+        const west = document.getElementById("west");
+        const westGreen = document.getElementById("west-green");
+        const westRed = document.getElementById("west-red");
+        const westYellow = document.getElementById("west-yellow");
+
+        const north = document.getElementById("north");
+        const northGreen = document.getElementById("north-green");
+        const northRed = document.getElementById("north-red");
+        const northYellow = document.getElementById("north-yellow");
+
+        const south = document.getElementById("south");
+        const southGreen = document.getElementById("south-green");
+        const southRed = document.getElementById("south-red");
+        const southYellow = document.getElementById("south-yellow");
+
+        var default_green = 10;
+        var default_yellow = 5;
+        var default_red = (default_green + default_yellow);
+        
+        var east_west_green = 0; 
+        var north_south_green = 0; 
+
+        var countInterval = 0;
+        // north-south and east-west
+        var traffic_round = ""
+
+        function turn_on_green(direct) {
+            switch (direct) {
+                case "north":
+                    northRed.classList.remove("on");
+                    northYellow.classList.remove("on");
+                    northGreen.classList.add("on");
+                    break;
+                case "west":
+                    westRed.classList.remove("on");
+                    westYellow.classList.remove("on");
+                    westGreen.classList.add("on");
+                    break;
+                case "south":
+                    southRed.classList.remove("on");
+                    southYellow.classList.remove("on");
+                    southGreen.classList.add("on");
+                    break;
+                case "east":
+                    eastRed.classList.remove("on");
+                    eastYellow.classList.remove("on");
+                    eastGreen.classList.add("on");
+                    break;
+            }
+        }
+
+        function turn_on_red(direct) {
+            switch (direct) {
+                case "north":
+                    northRed.classList.add("on");
+                    northYellow.classList.remove("on");
+                    northGreen.classList.remove("on");
+                    break;
+                case "west":
+                    westRed.classList.add("on");
+                    westYellow.classList.remove("on");
+                    westGreen.classList.remove("on");
+                    break;
+                case "south":
+                    southRed.classList.add("on");
+                    southYellow.classList.remove("on");
+                    southGreen.classList.remove("on");
+                    break;
+                case "east":
+                    eastRed.classList.add("on");
+                    eastYellow.classList.remove("on");
+                    eastGreen.classList.remove("on");
+                    break;
+            }
+        }
+
+        function turn_on_yellow(direct) {
+            switch (direct) {
+                case "north":
+                    northRed.classList.remove("on");
+                    northYellow.classList.add("on");
+                    northGreen.classList.remove("on");
+                    break;
+                case "west":
+                    westRed.classList.remove("on");
+                    westYellow.classList.add("on");
+                    westGreen.classList.remove("on");
+                    break;
+                case "south":
+                    southRed.classList.remove("on");
+                    southYellow.classList.add("on");
+                    southGreen.classList.remove("on");
+                    break;
+                case "east":
+                    eastRed.classList.remove("on");
+                    eastYellow.classList.add("on");
+                    eastGreen.classList.remove("on");
+                    break;
+            }
+        }
+
+        function set_time(time, direct) {
+            switch (direct) {
+                case "north_south":
+                    north.innerHTML = time
+                    south.innerHTML = time
+                    break;
+                case "west_east":
+                    east.innerHTML = time
+                    west.innerHTML = time
+                    break;
+            }
+        }
+
+        function sleep(time) {
+            return new Promise((resolve) => setTimeout(resolve, time));
+        }
+
+        async function start_traffic_light_cycle(green_time_1, green_time_2) {
+
+            // set time for each traffic light
+            let yellow_time_1 = default_yellow;
+            let red_time_1 = green_time_1 + yellow_time_1;
+
+            let yellow_time_2 = default_yellow;
+            let red_time_2 = green_time_2 + yellow_time_2;
+
+            // start traffic light interval
+            countInterval++;
+            console.log("--- Start running interval #",countInterval);
+            turn_on_red("north")
+            turn_on_red("south")
+            turn_on_green("east")
+            turn_on_green("west")
+            set_time(green_time_1, "west_east");
+            set_time(red_time_1, "north_south")
+            while (red_time_1 > 0) {
+                await sleep(1000);
+                if (green_time_1 <= 0) {
+                    turn_on_yellow("east")
+                    turn_on_yellow("west")
+                    yellow_time_1 -= 1
+                    set_time(yellow_time_1, "west_east")
+                } else {
+                    green_time_1 -= 1;
+                    set_time(green_time_1, "west_east")
+                }
+                red_time_1 -= 1;
+                set_time(red_time_1, "north_south");
+            }
+            // Done cycle 1
+            turn_on_red("east")
+            turn_on_red("west")
+            turn_on_green("north")
+            turn_on_green("south")
+            set_time(red_time_2, "west_east");
+            set_time(green_time_2, "north_south")
+            while (red_time_2 > 0) {
+                await sleep(1000);
+                if (green_time_2 <= 0) {
+                    turn_on_yellow("north")
+                    turn_on_yellow("south")
+                    yellow_time_2 -= 1
+                    set_time(yellow_time_2, "north_south")
+                } else {
+                    green_time_2 -= 1;
+                    set_time(green_time_2, "north_south")
+                }
+                red_time_2 -= 1;
+                set_time(red_time_2, "west_east");
+            }
+            console.log("--- End Interval #", countInterval)
+        }
+
+        async function start() {
+            logBox.value += "---- TRAFFICT LIGHT DEFAULT GREEN TIME ---- \n"
+            logBox.value += "EAST AND WEST : \n";
+            logBox.value += "Green : " + default_green + "s \n";
+            logBox.value += "Yellow : " + default_yellow + "s \n";
+            logBox.value += "RED : " + default_red + "s \n";
+            logBox.value += "NORTH AND SOUTH : \n";
+            logBox.value += "Green : " + default_green + "s \n"
+            logBox.value += "Yellow : " + default_yellow + "s \n";
+            logBox.value += "RED : " + default_red + "s \n";
+            logBox.value += "--------------------------- \n"
+            logBox.scrollTop = logBox.scrollHeight;
+            // Run the traffic light
+            var loop_time = 0;
+            var intervalTime = 0;
+            while(loop_time < 10) {
+                console.log("start : ", loop_time)
+                let green_time_1 = east_west_green == 0 ? default_green : east_west_green;
+                let green_time_2 = north_south_green == 0 ? default_green : north_south_green;
+                await start_traffic_light_cycle(green_time_1, green_time_2);
+                loop_time++;
+                logBox.value += `Traffic Light Loop #${loop_time} \n`;
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+        }
+
+        start();
+
+
+        // Anayly data analyForm
+        analyForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (fileNameData != "") {
+                const formData = new FormData(analyForm);
+                fetch('/analysis/' + fileNameData, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(message => {
+                        console.log(message)
+                        east_west_green = message[0];
+                        north_south_green = message[1];
+                        logBox.value += "---- UPDATE TRAFFIC LIGHT BY TRAIN MODEL ---- \n"
+                        logBox.value += "EAST AND WEST : \n";
+                        logBox.value += "Green : " + east_west_green + "s \n";
+                        logBox.value += "Yellow : " + default_yellow + "s \n";
+                        logBox.value += "RED : " + (east_west_green + default_yellow) + "s \n";
+                        logBox.value += "NORTH AND SOUTH : \n";
+                        logBox.value += "Green : " + north_south_green + "s \n"
+                        logBox.value += "Yellow : " + default_yellow + "s \n";
+                        logBox.value += "RED : " + (north_south_green + default_yellow) + "s \n";
+                        logBox.value += "--------------------------- \n"
+                        logBox.scrollTop = logBox.scrollHeight;
+                    })
+                    .catch(error => {
+                        console.error("Fetch error:", error);
+                    });
+            }
+        });
 
         // Train data
         trainForm.addEventListener('submit', function (event) {
@@ -41,16 +335,16 @@
                     method: 'POST',
                     body: formData
                 })
-                    .then(response => response.text()) 
+                    .then(response => response.text())
                     .then(message => {
                         trainResult.innerHTML = message
                         const imgElement = document.createElement('img');
                         imgElement.id = "result";
-                        imgElement.src = './runs/' + fileNameData; 
+                        imgElement.src = './runs/' + fileNameData;
                         imgElement.alt = 'Uploaded Image';
-                        imgElement.style.maxWidth = '100%'; 
-                        imagePreview.innerHTML = ''; 
-                        imagePreview.appendChild(imgElement); 
+                        imgElement.style.maxWidth = '100%';
+                        imagePreview.innerHTML = '';
+                        imagePreview.appendChild(imgElement);
                     })
                     .catch(error => {
                         console.error("Fetch error:", error);
@@ -87,6 +381,97 @@
                 });
         });
     </script>
+
+    <style>
+        .traffic-light-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            background: white;
+            flex-direction: column;
+        }
+
+        .intersection {
+            display: grid;
+            grid-template-areas:
+                "north"
+                "center"
+                "south";
+            grid-template-columns: 90px;
+            grid-template-rows: auto auto auto;
+            gap: 60px;
+            position: relative;
+        }
+
+        .intersection .horizontal {
+            display: flex;
+            justify-content: space-between;
+            width: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .traffic-light {
+            width: 40px;
+            height: 135px;
+            background: #333;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .light {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #111;
+        }
+
+        .light.red {
+            background: lightcoral;
+        }
+
+        .light.red.on {
+            background: red;
+        }
+
+        .light.yellow {
+            background: lightyellow;
+        }
+
+        .light.yellow.on {
+            background: yellow;
+        }
+
+
+        .light.green {
+            background: lightgreen;
+        }
+
+        .light.green.on {
+            background: lime;
+        }
+
+        .north {
+            grid-area: north;
+        }
+
+        .south {
+            grid-area: south;
+        }
+
+        .east,
+        .west {
+            margin-top: -60px;
+        }
+    </style>
 </body>
 
 </html>

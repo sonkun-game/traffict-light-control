@@ -1,0 +1,27 @@
+{
+    "east-car": "Xe ô tô ở phía Đông",
+    "east-long-truck": "Xe tải ở phía Đông",
+    "east-pickup-truck": "Xe bán tải ở phía Đông",
+    "east-bus": "Xe bus ở phía Đông",
+  
+    "north-car": "Xe ô tô ở phía Bắc",
+    "north-long-truck": "Xe tải ở phía Bắc",
+    "north-pickup-truck": "Xe bán tải ở phía Bắc",
+    "north-bus": "Xe bus ở phía Bắc",
+  
+    "south-car": "Xe ô tô ở phía Nam",
+    "south-long-truck": "Xe tải ở phía Nam",
+    "south-pickup-truck": "Xe bán tải ở phía Nam",
+    "south-bus": "Xe bus ở phía Nam",
+  
+    "west-car": "Xe ô tô ở phía Tây",
+    "west-long-truck": "Xe tải ở phía tây",
+    "west-pickup-truck": "Xe bán tải ở phía tây",
+    "west-bus": "Xe bus ở phía tây",
+  
+    "car-intersection": "Xe ô tô trong giao lộ",
+    "long-truck-intersection": "Xe tải trong giao lộ",
+    "pickup-truck-intersection": "Xe bán tải trong giao lộ",
+    "bus-intersection": "Xe bus trong giao lộ"
+  }
+  
