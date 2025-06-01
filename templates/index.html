@@ -105,6 +105,8 @@
         const southRed = document.getElementById("south-red");
         const southYellow = document.getElementById("south-yellow");
 
+        const apiUrl = 'http://192.168.12.210:5000/light/'
+
         var default_green = 10;
         var default_yellow = 5;
         var default_red = (default_green + default_yellow);
@@ -116,7 +118,14 @@
         // north-south and east-west
         var traffic_round = ""
 
-        function turn_on_green(direct) {
+        async function turn_on_light(direct, color) {
+            let url = apiUrl + direct + "/" + color;
+            await fetch(url, {
+                    method: 'POST',
+                }).then(response => response.text())
+        }
+
+        async function turn_on_green(direct) {
             switch (direct) {
                 case "north":
                     northRed.classList.remove("on");
@@ -139,9 +148,10 @@
                     eastGreen.classList.add("on");
                     break;
             }
+            await turn_on_light(direct, 'green')
         }
 
-        function turn_on_red(direct) {
+        async function turn_on_red(direct) {
             switch (direct) {
                 case "north":
                     northRed.classList.add("on");
@@ -164,9 +174,10 @@
                     eastGreen.classList.remove("on");
                     break;
             }
+            await turn_on_light(direct, 'red')
         }
 
-        function turn_on_yellow(direct) {
+        async function turn_on_yellow(direct) {
             switch (direct) {
                 case "north":
                     northRed.classList.remove("on");
@@ -189,6 +200,7 @@
                     eastGreen.classList.remove("on");
                     break;
             }
+            await turn_on_light(direct, 'yellow')
         }
 
         function set_time(time, direct) {
@@ -220,17 +232,17 @@
             // start traffic light interval
             countInterval++;
             console.log("--- Start running interval #",countInterval);
-            turn_on_red("north")
-            turn_on_red("south")
-            turn_on_green("east")
-            turn_on_green("west")
+            await turn_on_red("north")
+            await turn_on_red("south")
+            await turn_on_green("east")
+            await turn_on_green("west")
             set_time(green_time_1, "west_east");
             set_time(red_time_1, "north_south")
             while (red_time_1 > 0) {
                 await sleep(1000);
                 if (green_time_1 <= 0) {
-                    turn_on_yellow("east")
-                    turn_on_yellow("west")
+                    await turn_on_yellow("east")
+                    await turn_on_yellow("west")
                     yellow_time_1 -= 1
                     set_time(yellow_time_1, "west_east")
                 } else {
@@ -241,17 +253,17 @@
                 set_time(red_time_1, "north_south");
             }
             // Done cycle 1
-            turn_on_red("east")
-            turn_on_red("west")
-            turn_on_green("north")
-            turn_on_green("south")
+            await turn_on_red("east")
+            await turn_on_red("west")
+            await turn_on_green("north")
+            await turn_on_green("south")
             set_time(red_time_2, "west_east");
             set_time(green_time_2, "north_south")
             while (red_time_2 > 0) {
                 await sleep(1000);
                 if (green_time_2 <= 0) {
-                    turn_on_yellow("north")
-                    turn_on_yellow("south")
+                    await turn_on_yellow("north")
+                    await turn_on_yellow("south")
                     yellow_time_2 -= 1
                     set_time(yellow_time_2, "north_south")
                 } else {
