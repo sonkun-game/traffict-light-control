@@ -22,7 +22,7 @@
             <form id="train-form" enctype="multipart/form-data">
                 <button type="submit">Train Data</button>
             </form>
-            <h3>Kết quả sau khi đánh giá model</h3>
+            <h3>Kết quả đếm xe ô tô</h3>
             <p id="train-result"></p>
 
             <!-- Đánh giá mô hình -->
@@ -35,9 +35,13 @@
 
         <!-- right panel -->
         <div class="traffic-light-container ">
+
+            <div class="counter">
+                Loop Time : <span id="loop-time">0</span>
+            </div>
+
             <div class="intersection">
                 <!-- North -->
-
                 <div class="traffic-light north">
                     <span id="north" style="position: absolute; top: -20px">30</span>
                     <div id="north-red" class="light red"></div>
@@ -118,11 +122,14 @@
         // north-south and east-west
         var traffic_round = ""
 
+        var loopTime = document.getElementById("loop-time");
+        var loop_time = 0;
+
         async function turn_on_light(direct, color) {
-            let url = apiUrl + direct + "/" + color;
-            await fetch(url, {
-                    method: 'POST',
-                }).then(response => response.text())
+            // let url = apiUrl + direct + "/" + color;
+            // await fetch(url, {
+            //         method: 'POST',
+            //     }).then(response => response.text())
         }
 
         async function turn_on_green(direct) {
@@ -289,7 +296,7 @@
             logBox.value += "--------------------------- \n"
             logBox.scrollTop = logBox.scrollHeight;
             // Run the traffic light
-            var loop_time = 0;
+            
             var intervalTime = 0;
             while(loop_time < 10) {
                 console.log("start : ", loop_time)
@@ -299,6 +306,7 @@
                 loop_time++;
                 logBox.value += `Traffic Light Loop #${loop_time} \n`;
                 logBox.scrollTop = logBox.scrollHeight;
+                loopTime.innerHTML = loop_time;
             }
         }
 
@@ -319,6 +327,11 @@
                         console.log(message)
                         east_west_green = message[0];
                         north_south_green = message[1];
+                        r_east = message[2];
+                        r_north = message[3];
+                        r_west = message[4]; 
+                        r_south = message[5];
+
                         logBox.value += "---- UPDATE TRAFFIC LIGHT BY TRAIN MODEL ---- \n"
                         logBox.value += "EAST AND WEST : \n";
                         logBox.value += "Green : " + east_west_green + "s \n";
@@ -328,6 +341,7 @@
                         logBox.value += "Green : " + north_south_green + "s \n"
                         logBox.value += "Yellow : " + default_yellow + "s \n";
                         logBox.value += "RED : " + (north_south_green + default_yellow) + "s \n";
+                        logBox.value += "The new signal will be start in loop " + (loop_time + 1) + " \n"
                         logBox.value += "--------------------------- \n"
                         logBox.scrollTop = logBox.scrollHeight;
                     })
@@ -395,6 +409,13 @@
     </script>
 
     <style>
+        .counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
         .traffic-light-container {
             display: flex;
             justify-content: center;

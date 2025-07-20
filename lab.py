@@ -3,7 +3,7 @@ from collections import Counter
 import json
 
 def collect_data_by_train_model(image_path):
-    model = YOLO('./best.pt')
+    model = YOLO('./best12_v3.pt')
     image_path = 'img/' + image_path
     result = model(image_path, save=True)[0]
 
